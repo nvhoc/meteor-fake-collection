@@ -23,4 +23,7 @@
 //          1/19/16 - hocnguyen - Init first revision.
 // =============================================================================
 FCM = {
+  init: function(name){
+    FCM[name] = new fakeCollection(name);
+  }
 };

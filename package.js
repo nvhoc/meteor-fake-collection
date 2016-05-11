@@ -9,5 +9,5 @@ Package.on_use(function (api) {
   api.add_files(['refetch.js'], 'client');
   api.add_files(['fakeCollection.js'], 'client');
   api.add_files(['fakeCollectionManagement.js'], 'client');
-  api.export('FKM','client');
+  api.export('FCM','client');
 });
