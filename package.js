@@ -7,7 +7,4 @@ Package.describe({
 Package.on_use(function (api) {
   api.use('mongo');
   api.add_files(['refetch.js'], 'client');
-  api.add_files(['fakeCollection.js'], 'client');
-  api.add_files(['fakeCollectionManagement.js'], 'client');
-  api.export('FCM','client');
 });
