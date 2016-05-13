@@ -29,6 +29,13 @@ Mongo.Collection.prototype.setFetch = function (rest) {
     this._rest = "fetch_" + this._name;
   else
     this._rest = rest;
+};
+Mongo.Collection.prototype.fetchReset = function () {
+  this._collection._docs._map = {};
+  FETCHDATA.subFetch = {};
+  FETCHDATA.pageFetch = {};
+  FETCHDATA.indexId = {};
+  FETCHDATA.indexPage = {};
 }
 Mongo.Collection.prototype.fetchData = function (session, data) {
   var self = this;
@@ -86,7 +93,7 @@ Mongo.Collection.prototype.refetch = function (infos, clearOldData) {
   if (!this.dep)
     this.dep = new Tracker.Dependency;
   if (clearOldData) {
-    this.remove();
+    this._collection._docs._map = {};
   }
   var data = {};
   if (Array.isArray(infos)) {
