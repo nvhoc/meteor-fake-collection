@@ -2,6 +2,7 @@ FETCHDATA = {
   subFetch: {},
   pageFetch: {},
   indexId: {},
+  indexPage: {},
   requestAjax: function (opt, cb) {
     var query = {
       method: !!opt.method
@@ -41,7 +42,13 @@ Mongo.Collection.prototype.fetchData = function (session, data) {
     : {};
   var isMore = data.isMore;
   var isRemove = data.isRemove;
+  var pageShow = data.page;
   var limit = 10;
+
+  if (isRemove) {
+    FETCHDATA.indexId[session] = false;
+    FETCHDATA.pageFetch[name] = null;
+  }
   if (FETCHDATA.indexId[session] && !isMore) {
     Session.setDefault(session, true);
     return;
@@ -50,12 +57,21 @@ Mongo.Collection.prototype.fetchData = function (session, data) {
     FETCHDATA.pageFetch[name]++;
   if (!FETCHDATA.pageFetch[name])
     FETCHDATA.pageFetch[name] = 0;
+  var pageFetch = FETCHDATA.pageFetch[name];
+  if (typeof pageShow == 'number') {
+    if (!FETCHDATA.indexPage[name]) {
+      FETCHDATA.indexPage[name] = {};
+    }
+    FETCHDATA.indexPage[name][pageShow] = FETCHDATA.pageFetch[name];
+    pageFetch = pageShow;
+    FETCHDATA.pageFetch[name]++;
+  }
   Session.setDefault(session, false);
   Meteor.autorun(function () {
     var token = Session.get('loginToken');
     var user = Meteor.user();
     if (token && user) {
-      Meteor.call('fetch_' + name, selector, opts, FETCHDATA.pageFetch[name], limit, function (err, res) {
+      Meteor.call(rest, selector, opts, pageFetch, limit, function (err, res) {
         if (res.status == "success") {
           if (!FETCHDATA.indexId[session])
             FETCHDATA.indexId[session] = true;
