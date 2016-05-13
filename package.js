@@ -7,4 +7,5 @@ Package.describe({
 Package.on_use(function (api) {
   api.use('mongo');
   api.add_files(['refetch.js'], 'client');
+  api.export("FETCHDATA");
 });
