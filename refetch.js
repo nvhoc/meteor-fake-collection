@@ -54,24 +54,24 @@ Mongo.Collection.prototype.fetchData = function (session, data) {
 
   if (isRemove) {
     FETCHDATA.indexId[session] = false;
-    FETCHDATA.pageFetch[name] = null;
+    FETCHDATA.pageFetch[session] = null;
   }
   if (FETCHDATA.indexId[session] && !isMore) {
     Session.setDefault(session, true);
     return;
   }
-  if (isMore && typeof FETCHDATA.pageFetch[name] == 'number')
-    FETCHDATA.pageFetch[name]++;
-  if (!FETCHDATA.pageFetch[name])
-    FETCHDATA.pageFetch[name] = 0;
-  var pageFetch = FETCHDATA.pageFetch[name];
+  if (isMore && typeof FETCHDATA.pageFetch[session] == 'number')
+    FETCHDATA.pageFetch[session]++;
+  if (!FETCHDATA.pageFetch[session])
+    FETCHDATA.pageFetch[session] = 0;
+  var pageFetch = FETCHDATA.pageFetch[session];
   if (typeof pageShow == 'number') {
     if (!FETCHDATA.indexPage[name]) {
       FETCHDATA.indexPage[name] = {};
     }
-    FETCHDATA.indexPage[name][pageShow] = FETCHDATA.pageFetch[name];
+    FETCHDATA.indexPage[name][pageShow] = FETCHDATA.pageFetch[session];
     pageFetch = pageShow;
-    FETCHDATA.pageFetch[name]++;
+    FETCHDATA.pageFetch[session]++;
   }
   Session.setDefault(session, false);
   Meteor.autorun(function () {
