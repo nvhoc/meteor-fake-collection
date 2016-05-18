@@ -7,5 +7,9 @@ Package.describe({
 Package.on_use(function (api) {
   api.use('mongo');
   api.add_files(['refetch.js'], 'client');
-  api.export("FETCHDATA");
+  api.add_files(['filter.js'], 'client');
+  api.add_files(['filterServer.js'], 'server');
+  api.export("FETCHDATA", 'client');
+  api.export("filterType", 'client');
+  api.export("filterFunc", 'server');
 });

@@ -1,4 +1,5 @@
 FETCHDATA = {
+  isGotData: {},
   subFetch: {},
   pageFetch: {},
   indexId: {},
@@ -36,9 +37,12 @@ Mongo.Collection.prototype.fetchReset = function () {
   FETCHDATA.pageFetch = {};
   FETCHDATA.indexId = {};
   FETCHDATA.indexPage = {};
+  FETCHDATA.isGotData = {};
 }
-Mongo.Collection.prototype.fetchData = function (session, data) {
+Mongo.Collection.prototype.fetchData = function (session, data, opt) {
   var self = this;
+  var notUseFilterData = (opt)?opt.notUseFilterData:null;
+  if (this.filterData && !notUseFilterData) this.filterData(session, data);
   var name = self._name;
   var rest = self._rest;
   var selector = !!data.selector
@@ -49,14 +53,28 @@ Mongo.Collection.prototype.fetchData = function (session, data) {
     : {};
   var isMore = data.isMore;
   var isRemove = data.isRemove;
+  var isReset = data.isReset;
+  var notQuery = data.notQuery;
   var pageShow = data.page;
+  var notNoticeChanged = data.notNoticeChanged;
   var limit = 10;
-
-  if (isRemove) {
-    FETCHDATA.indexId[session] = false;
-    FETCHDATA.pageFetch[session] = null;
+  if (isRemove || isReset) {
+    FETCHDATA.pageFetch[session] = 0;
+    FETCHDATA.isGotData[session] = false;
+    data.isReset = false;
+    data.isRemove = false;
   }
-  if (FETCHDATA.indexId[session] && !isMore) {
+  if (FETCHDATA.indexId[session] && !isMore && !isReset) {
+    Session.setDefault(session, true);
+    return;
+  }
+  if (notQuery) {
+    if (!FETCHDATA.indexId[session])
+      FETCHDATA.indexId[session] = data;
+    if (!this.dep)
+      this.dep = new Tracker.Dependency;
+    if (!notNoticeChanged)
+      this.dep.changed();
     Session.setDefault(session, true);
     return;
   }
@@ -79,22 +97,20 @@ Mongo.Collection.prototype.fetchData = function (session, data) {
     var user = Meteor.user();
     if (token && user) {
       Meteor.call(rest, selector, opts, pageFetch, limit, function (err, res) {
-        if (res.status == "success") {
+        if (res && res.status == "success") {
+          FETCHDATA.isGotData[session] = true;
           if (!FETCHDATA.indexId[session])
-            FETCHDATA.indexId[session] = true;
-          self.refetch(res.data, isRemove);
+            FETCHDATA.indexId[session] = data;
+          self.refetch(res.data,notNoticeChanged);
           Session.set(session, true);
         }
       })
     }
   });
-}
-Mongo.Collection.prototype.refetch = function (infos, clearOldData) {
+};
+Mongo.Collection.prototype.refetch = function (infos, notNoticeChanged) {
   if (!this.dep)
     this.dep = new Tracker.Dependency;
-  if (clearOldData) {
-    this._collection._docs._map = {};
-  }
   var data = {};
   if (Array.isArray(infos)) {
     infos.forEach(function (info) {
@@ -104,7 +120,8 @@ Mongo.Collection.prototype.refetch = function (infos, clearOldData) {
     data[infos._id] = infos;
   }
   this._collection._docs._map = _.extend(this._collection._docs._map, data);
-  this.dep.changed();
+  if (!notNoticeChanged)
+    this.dep.changed();
 };
 Mongo.Collection.prototype.oldFind = Mongo.Collection.prototype.find;
 Mongo.Collection.prototype.oldFindOne = Mongo.Collection.prototype.findOne;
