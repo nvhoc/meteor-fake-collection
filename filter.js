@@ -39,21 +39,21 @@ filterType = {
   }
 };
 filterType.regex.prototype.removeFilter = function (collection, source) {
-  var filterField = collection.filterField;
-  if (!source || !source.selector.$or || !filterField || !Array.isArray(filterField)) return _.extend(source, {isReset: true});
+  var indexFilterField = collection.indexFilterField;
+  if (!source || !source.selector || !source.selector.$and || !indexFilterField) return _.extend(source, {isReset: true});
   var selector = source.selector;
-  var indexOr = {};
-  for (var i = 0; i < selector.$or.length; i++) {
-    var key = Object.keys(selector.$or[i])[0];
-    indexOr[key] = i;
-  }
-  var length = filterField.length;
+  var length = selector.$and.length;
   for (var i = 0; i < length; i++) {
-    if (typeof indexOr[filterField[i]] == 'number')
-      selector.$or.splice(indexOr[filterField[i]], 1);
-  }
-  if (selector.$or.length == 0) {
-    delete selector.$or;
+    var key = Object.keys(selector.$and[i])[0];
+    if (key != '$or') continue;
+    var keyOr = Object.keys(selector.$and[i].$or[0])[0];
+    if (indexFilterField[keyOr]) {
+      selector.$and.splice(i, 1);
+      if (selector.$and.length == 0){
+        delete selector.$and;
+      }
+      return _.extend(source, {isReset: true});
+    }
   }
   return _.extend(source, {isReset: true});
 };
@@ -61,19 +61,24 @@ filterType.regex.prototype.connect = function (collection, source) {
   if (this.txt == "") {
     return this.removeFilter(collection, source)
   }
+  source = this.removeFilter(collection, source);
   var regex = {regex: this.txt};
   var filterField = collection.filterField;
-  var selector = {};
+  var or = [];
   if (filterField && Array.isArray(filterField)) {
     var length = filterField.length;
-    selector.$or = [];
     for (var i = 0; i < length; i++) {
       var field = {};
       field[filterField[i]] = regex;
-      selector.$or.push(field);
+      or.push(field);
     }
   }
-  source.selector = _.extend(source.selector, selector);
+  if (source && source.selector) {
+    if (source.selector.$and)
+      source.selector.$and.push({$or: or});
+    else
+      source.selector.$and = [{$or: or}];
+  }
   return _.extend(source, {isReset: true});
 
 };
@@ -108,16 +113,13 @@ filterType.exists.prototype.connect = function (session, source) {
     }
   }
 }
-Mongo.Collection.prototype.setFilterField = function (fields) {
-  this.filterField = fields;
-}
 Mongo.Collection.prototype.filter = function (selector) {
   var self = this;
   this._collection._docs._map = {};
   for (var key in FETCHDATA.indexId) {
     FETCHDATA.indexId[key] = selector.connect(self, FETCHDATA.indexId[key]);
     this.filterData = function (key, data) {
-      return selector.connect(self, data);
+      return _.extend(selector.connect(self, data), {isReset: false});
     };
     this.fetchData(key, FETCHDATA.indexId[key], {notUseFilterData: true});
   }

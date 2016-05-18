@@ -78,8 +78,10 @@ Mongo.Collection.prototype.fetchData = function (session, data, opt) {
     Session.setDefault(session, true);
     return;
   }
-  if (isMore && typeof FETCHDATA.pageFetch[session] == 'number')
+  if (isMore && typeof FETCHDATA.pageFetch[session] == 'number') {
     FETCHDATA.pageFetch[session]++;
+    data.isMore = false;
+  }
   if (!FETCHDATA.pageFetch[session])
     FETCHDATA.pageFetch[session] = 0;
   var pageFetch = FETCHDATA.pageFetch[session];

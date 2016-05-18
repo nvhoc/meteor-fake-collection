@@ -25,16 +25,26 @@
 filterFunc = {
   fixRegex: function(selector){
     if (!selector) return {};
-    if (!selector.$or) return selector;
-    var OR = selector.$or;
-    var lengthOr = OR.length;
-    for (var i = 0; i < lengthOr; i++){
-      var key = Object.keys(OR[i]);
-      if (OR[i][key].regex){
-        OR[i][key] = new RegExp(OR[i][key].regex,'gi');
+    if (!selector.$and) return selector;
+    var AND = selector.$and;
+    var lengthAnd = AND.length;
+    for (var i = 0; i < lengthAnd; i++){
+      var keyAnd = Object.keys(AND[i])[0];
+      if (keyAnd != '$or') continue;
+      var OR = AND[i].$or;
+      var lengthOr = OR.length;
+      for (var j= 0; j < lengthOr; j++) {
+        var key = Object.keys(OR[j])[0];
+        if (OR[j][key].regex) {
+          OR[j][key] = new RegExp(OR[j][key].regex, 'gi');
+        }
       }
+      console.log('OR selector',OR);
+      console.log('OR selector',OR[0].seq);
+      AND[i].$or = OR;
+      selector.$and = AND;
+      return selector;
     }
-    selector.$or =OR;
     return selector;
   }
 }
