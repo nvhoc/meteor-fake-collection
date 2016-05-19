@@ -41,7 +41,9 @@ Mongo.Collection.prototype.fetchReset = function () {
 }
 Mongo.Collection.prototype.fetchData = function (session, data, opt) {
   var self = this;
-  var notUseFilterData = (opt)?opt.notUseFilterData:null;
+  var notUseFilterData = (opt)
+    ? opt.notUseFilterData
+    : null;
   if (this.filterData && !notUseFilterData) this.filterData(session, data);
   var name = self._name;
   var rest = self._rest;
@@ -103,7 +105,7 @@ Mongo.Collection.prototype.fetchData = function (session, data, opt) {
           FETCHDATA.isGotData[session] = true;
           if (!FETCHDATA.indexId[session])
             FETCHDATA.indexId[session] = data;
-          self.refetch(res.data,notNoticeChanged);
+          self.refetch(res.data, notNoticeChanged);
           Session.set(session, true);
         }
       })
@@ -136,3 +138,4 @@ Mongo.Collection.prototype.find = function (selector) {
 Mongo.Collection.prototype.findOne = function (selector) {
   return this.oldFindOne.apply(this, arguments);
 };
+

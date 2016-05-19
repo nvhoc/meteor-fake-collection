@@ -24,5 +24,6 @@
 // =============================================================================
 Meteor.publish('countByFakeCollection', function (session, query) {
   if (!this.userId) return this.ready();
+  console.log('query publish ',filterFunc.fixRegex(query))
   Counts.publish(this, session, Trip.find(filterFunc.fixRegex(query)));
 });

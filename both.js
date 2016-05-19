@@ -30,4 +30,4 @@ Mongo.Collection.prototype.setFilterField = function (fields) {
     indexOr[key] = true;
   }
   this.indexFilterField = indexOr;
-}
+};
