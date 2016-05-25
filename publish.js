@@ -22,8 +22,9 @@
 // Changelog:
 //          5/18/16 - hocnguyen - Init first revision.
 // =============================================================================
-Meteor.publish('countByFakeCollection', function (session, query) {
+Meteor.publish('countByFakeCollection', function (name, session, query) {
   if (!this.userId) return this.ready();
-  console.log('query publish ',filterFunc.fixRegex(query))
-  Counts.publish(this, session, Trip.find(filterFunc.fixRegex(query)));
+  console.log('query publish '+session,filterFunc.fixRegex(query));
+  console.log('query publish count'+session,FETCHDATA.collection[name].find(filterFunc.fixRegex(query)).count());
+  Counts.publish(this, session, FETCHDATA.collection[name].find(filterFunc.fixRegex(query)));
 });

@@ -23,6 +23,15 @@
 //          5/18/16 - hocnguyen - Init first revision.
 // =============================================================================
 Mongo.Collection.prototype.setFilterField = function (fields) {
+
+};
+Mongo.Collection.prototype.setFetch = function (data) {
+  var rest = data.rest;
+  var fields = data.regex;
+  if (!rest)
+    this._rest = "fetch_" + this._name;
+  else
+    this._rest = rest;
   this.filterField = fields;
   var indexOr = {};
   for (var i = 0; i < fields.length; i++) {
@@ -30,4 +39,14 @@ Mongo.Collection.prototype.setFilterField = function (fields) {
     indexOr[key] = true;
   }
   this.indexFilterField = indexOr;
+  FETCHDATA.collection[this._name] = this;
+};
+
+FETCHDATA = {
+  isGotData: {},
+  subFetch: {},
+  pageFetch: {},
+  indexId: {},
+  indexPage: {},
+  collection:{}
 };

@@ -47,7 +47,7 @@ filterType.regex.prototype.removeFilter = function (collection, source) {
     var key = Object.keys(selector.$and[i])[0];
     if (key != '$or') continue;
     var keyOr = Object.keys(selector.$and[i].$or[0])[0];
-    if (indexFilterField[keyOr]) {
+    if (indexFilterField[keyOr] && selector.$and[i].$or[0][keyOr].regex) {
       selector.$and.splice(i, 1);
       if (selector.$and.length == 0){
         delete selector.$and;

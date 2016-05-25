@@ -1,36 +1,3 @@
-FETCHDATA = {
-  isGotData: {},
-  subFetch: {},
-  pageFetch: {},
-  indexId: {},
-  indexPage: {},
-  requestAjax: function (opt, cb) {
-    var query = {
-      method: !!opt.method
-        ? opt.method
-        : "GET",
-      url: ENUM_CLIENT.GET_API(opt.url),
-      beforeSend: function (xhr) {
-        xhr.setRequestHeader('X-Auth-Token', opt.token);
-        xhr.setRequestHeader('X-User-Id', opt.userId);
-      }
-    };
-    if (opt.method != "GET") {
-      query.data = opt.data;
-    }
-    $.ajax(query)
-      .done(function (msg) {
-        cb(msg);
-      });
-  }
-};
-Mongo.Collection.prototype.setFetch = function (rest) {
-  this._useFetch = true;
-  if (!rest)
-    this._rest = "fetch_" + this._name;
-  else
-    this._rest = rest;
-};
 Mongo.Collection.prototype.fetchReset = function () {
   this._collection._docs._map = {};
   FETCHDATA.subFetch = {};
@@ -139,3 +106,28 @@ Mongo.Collection.prototype.findOne = function (selector) {
   return this.oldFindOne.apply(this, arguments);
 };
 
+var connectionCount = 0;
+Meteor.startup(function(){
+  Tracker.autorun(function() {
+    var status = Meteor.status().status;
+    if (status == 'offline') {
+      connectionCount = -1;
+    }
+    ;
+    if (status == 'connected') {
+      connectionCount = 1;
+    }
+    if (connectionCount === 1) {
+      for (var name in  FETCHDATA.collection){
+        var self = FETCHDATA.collection[name];
+        self._collection._docs._map = {};
+        for (var key in FETCHDATA.indexId) {
+          self.fetchData(key, _.extend(FETCHDATA.indexId[key], {isReset: true}));
+        }
+        if (self.dep)
+          self.dep.changed();
+      }
+
+    }
+  });
+})
