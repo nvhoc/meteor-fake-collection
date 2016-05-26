@@ -48,5 +48,6 @@ FETCHDATA = {
   pageFetch: {},
   indexId: {},
   indexPage: {},
-  collection:{}
+  collection:{},
+  isCounted: {}
 };
