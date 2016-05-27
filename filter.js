@@ -116,13 +116,14 @@ filterType.exists.prototype.connect = function (session, source) {
 }
 Mongo.Collection.prototype.filter = function (selector) {
   var self = this;
+  var name = self._name;
   this._collection._docs._map = {};
-  for (var key in FETCHDATA.indexId) {
-    FETCHDATA.indexId[key] = selector.connect(self, FETCHDATA.indexId[key]);
+  for (var key in FETCHDATA.indexId[name]) {
+    FETCHDATA.indexId[name][key] = selector.connect(self, FETCHDATA.indexId[name][key]);
     this.filterData = function (key, data) {
       return _.extend(selector.connect(self, data), {isReset: false});
     };
-    this.fetchData(key, FETCHDATA.indexId[key], {notUseFilterData: true});
+    this.fetchData(key, FETCHDATA.indexId[name][key], {notUseFilterData: true});
   }
   if (this.dep)
     this.dep.changed();

@@ -40,6 +40,7 @@ Mongo.Collection.prototype.setFetch = function (data) {
   }
   this.indexFilterField = indexOr;
   FETCHDATA.collection[this._name] = this;
+  FETCHDATA.indexId[this._name] = {};
 };
 
 FETCHDATA = {

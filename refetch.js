@@ -2,7 +2,8 @@ Mongo.Collection.prototype.fetchReset = function () {
   this._collection._docs._map = {};
   FETCHDATA.subFetch = {};
   FETCHDATA.pageFetch = {};
-  FETCHDATA.indexId = {};
+  for (var key in FETCHDATA.indexId)
+    FETCHDATA.indexId[key] = {};
   FETCHDATA.indexPage = {};
   FETCHDATA.isGotData = {};
 }
@@ -33,13 +34,13 @@ Mongo.Collection.prototype.fetchData = function (session, data, opt) {
     data.isReset = false;
     data.isRemove = false;
   }
-  if (FETCHDATA.indexId[session] && !isMore && !isReset) {
+  if (FETCHDATA.indexId[name][session] && !isMore && !isReset) {
     Session.setDefault(session, true);
     return;
   }
   if (notQuery) {
-    if (!FETCHDATA.indexId[session])
-      FETCHDATA.indexId[session] = data;
+    if (!FETCHDATA.indexId[name][session])
+      FETCHDATA.indexId[name][session] = data;
     if (!this.dep)
       this.dep = new Tracker.Dependency;
     if (!notNoticeChanged)
@@ -70,8 +71,8 @@ Mongo.Collection.prototype.fetchData = function (session, data, opt) {
       Meteor.call(rest, selector, opts, pageFetch, limit, function (err, res) {
         if (res && res.status == "success") {
           FETCHDATA.isGotData[session] = true;
-          if (!FETCHDATA.indexId[session])
-            FETCHDATA.indexId[session] = data;
+          if (!FETCHDATA.indexId[name][session])
+            FETCHDATA.indexId[name][session] = data;
           self.refetch(res.data, notNoticeChanged);
           Session.set(session, true);
         }
@@ -121,8 +122,8 @@ Meteor.startup(function(){
       for (var name in  FETCHDATA.collection){
         var self = FETCHDATA.collection[name];
         self._collection._docs._map = {};
-        for (var key in FETCHDATA.indexId) {
-          self.fetchData(key, _.extend(FETCHDATA.indexId[key], {isReset: true}));
+        for (var key in FETCHDATA.indexId[name]) {
+          self.fetchData(key, _.extend(FETCHDATA.indexId[name][key], {isReset: true}));
         }
         if (self.dep)
           self.dep.changed();
