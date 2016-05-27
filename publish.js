@@ -26,11 +26,5 @@ Meteor.publish('countByFakeCollection', function (name, session, query) {
   if (!this.userId) return this.ready();
   console.log('query publish '+session,filterFunc.fixRegex(query));
   console.log('query publish count'+session,FETCHDATA.collection[name].find(filterFunc.fixRegex(query)).count());
-
-  if (!FETCHDATA.isCounted[name]) FETCHDATA.isCounted[name] ={};
-  var isCounted = FETCHDATA.isCounted[name][session];
-  if (!isCounted)
-    FETCHDATA.isCounted[name][session] = true;
-
-  return Counts.publish(this, session, FETCHDATA.collection[name].find(filterFunc.fixRegex(query)),{isCounted:  isCounted});
+  return Counts.publish(this, session, FETCHDATA.collection[name].find(filterFunc.fixRegex(query)));
 });

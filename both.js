@@ -49,5 +49,6 @@ FETCHDATA = {
   indexId: {},
   indexPage: {},
   collection:{},
-  isCounted: {}
+  isCounted: {},
+  publish: {}
 };

@@ -73,7 +73,8 @@ filterType.regex.prototype.connect = function (collection, source) {
       or.push(field);
     }
   }
-  if (source && source.selector) {
+  if (source) {
+    source.selector = source.selector || {};
     if (source.selector.$and)
       source.selector.$and.push({$or: or});
     else
